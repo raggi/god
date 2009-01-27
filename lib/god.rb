@@ -178,7 +178,8 @@ module God
                   :groups,
                   :contacts,
                   :contact_groups,
-                  :main
+                  :main,
+                  :at_starts
   end
   
   # initialize class instance variables
@@ -204,6 +205,7 @@ module God
     self.pending_watch_states = {}
     self.contacts = {}
     self.contact_groups = {}
+    self.at_starts = []
     
     # set defaults
     self.log_buffer_size ||= LOG_BUFFER_SIZE_DEFAULT
@@ -227,6 +229,12 @@ module God
     
     # not yet running
     self.running = false
+  end
+  
+  def self.at_start(&blk)
+    self.internal_init
+    self.at_starts << blk
+    blk.call if self.running
   end
   
   # Instantiate a new, empty Watch object and pass it to the mandatory
@@ -614,6 +622,10 @@ module God
     
     # mark as running
     self.running = true
+    
+    self.at_starts.each do |operation|
+      operation.call
+    end
     
     # don't exit
     self.main = 

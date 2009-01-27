@@ -549,6 +549,28 @@ class TestGod < Test::Unit::TestCase
     assert_equal %w{ fuzed fuzed2 }, God.pattern_match('fu', list)
     assert_equal %w{ mysql }, God.pattern_match('sql', list)
   end
+  
+  # at_start
+  
+  def test_at_start_should_execute_at_startup
+    good = false
+    God.at_start { good = true }
+    assert !good
+    no_stdout do
+      God.start
+    end
+    assert good
+  end
+  
+  def test_at_start_when_running_should_execute_block_immediately
+    good = false
+    no_stdout do
+      God.start
+    end
+    assert !good
+    God.at_start { good = true }
+    assert good
+  end
 end
 
 
